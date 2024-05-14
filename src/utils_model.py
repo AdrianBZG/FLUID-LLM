@@ -1,12 +1,13 @@
 import torch
 import torch.nn.functional as F
 from dataloader.ds_props import DSProps
-from dataloader.simple_dataloader import MGNDataset
+# from dataloader.simple_dataloader import MGNDataset
+from dataloader.ds2 import AirfoilDataset
 from torch.utils.data import DataLoader
 
 
 def get_data_loader(config, mode="train"):
-    ds = MGNDataset(load_dir=f'{config["load_dir"]}/{mode}',
+    ds = AirfoilDataset(load_dir=f'{config["load_dir"]}/{mode}',
                     resolution=config['resolution'],
                     patch_size=config['patch_size'],
                     stride=config['stride'],
