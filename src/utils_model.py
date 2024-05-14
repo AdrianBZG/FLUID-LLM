@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from dataloader.ds_props import DSProps
 # from dataloader.simple_dataloader import MGNDataset
-from dataloader.ds2 import AirfoilDataset
+from dataloader.airfoil_ds import AirfoilDataset
 from torch.utils.data import DataLoader
 
 
