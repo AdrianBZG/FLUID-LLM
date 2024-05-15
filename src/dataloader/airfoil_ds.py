@@ -182,9 +182,6 @@ class AirfoilDataset(Dataset):
         faces = faces[face_mask]
         faces = all_nodes[faces]
 
-        # plot_mesh(pos, faces, save_data['velocity'][100, :, 0])
-        # exit(5)
-
         triang, tri_index, grid_x, grid_y = get_mesh_interpolation(pos, faces, self.resolution)
 
         return triang, tri_index, grid_x, grid_y, save_data
@@ -218,12 +215,22 @@ class AirfoilDataset(Dataset):
 
     def _normalize(self, states):
         """ states.shape = [seq_len, N_patch, 3, patch_x, patch_y] """
-        s0_mean, s0_var = 0.823, 0.3315
-        s1_mean, s1_var = 0.0005865, 0.01351
-        s2_mean, s2_var = 0.04763, 0.07536
+        # State 0:  175, 65.32
+        # Diff 0: -0.0201, 2.853
+        # 24.9, 1.84
+        # State 1: -1.458, 44.68
+        # Diff 1: 0.00102, 3.636
+        # 20.1, 2.24
+        # State 2:  1.003e+05, 6197
+        # Diff 2: -4.02, 538.5
+        # 4.71e+03, 421
+
+        s0_mean, s0_std = 175, 65.32
+        s1_mean, s1_std = -1.458, 44.68
+        s2_mean, s2_std = 1.003e+05, 6197
 
         means = torch.tensor([s0_mean, s1_mean, s2_mean]).reshape(1, 1, 3, 1, 1)
-        stds = torch.tensor([0.275, 0.275, 0.275]).reshape(1, 1, 3, 1, 1)
+        stds = torch.tensor([50, 50, 6197]).reshape(1, 1, 3, 1, 1)
 
         # Normalise states
         states = states - means
