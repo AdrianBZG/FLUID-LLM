@@ -168,6 +168,7 @@ class AirfoilDataset(Dataset):
         mask = x_mask & y_mask
 
         pos = pos[mask]
+
         save_data['velocity'] = save_data['velocity'][:, mask]
         save_data['pressure'] = save_data['pressure'][:, mask]
         save_data['density'] = save_data['density'][:, mask]
@@ -260,8 +261,8 @@ class AirfoilDataset(Dataset):
 def plot_all_patches():
     patch_size = (16, 16)
 
-    seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/test", resolution=210, patch_size=patch_size, stride=patch_size,
-                            seq_len=10, seq_interval=2, normalize=True, mode="test")
+    seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/valid", resolution=210, patch_size=patch_size, stride=patch_size,
+                            seq_len=10, seq_interval=2, normalize=True, mode="valid")
 
     ds = DataLoader(seq_dl, batch_size=8)
 
