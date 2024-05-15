@@ -88,7 +88,7 @@ class AirfoilDataset(Dataset):
         masks = torch.permute(masks, [0, 3, 1, 2])
 
         if self.normalize:
-            states = self._normalize(states)
+            states = self._normalize(states, masks)
 
         diffs = states[1:] - states[:-1]  # shape = (seq_len, num_patches, C, H, W)
         next_state = states[1:]
@@ -213,7 +213,7 @@ class AirfoilDataset(Dataset):
 
         return np.stack(to_patches)
 
-    def _normalize(self, states):
+    def _normalize(self, states, masks):
         """ states.shape = [seq_len, N_patch, 3, patch_x, patch_y] """
         # State 0:  175, 65.32
         # Diff 0: -0.0201, 2.853
@@ -233,8 +233,13 @@ class AirfoilDataset(Dataset):
         stds = torch.tensor([50, 50, 6197]).reshape(1, 1, 3, 1, 1)
 
         # Normalise states
-        states = states - means
-        states = states / stds
+        masks = masks.unsqueeze(2).repeat(1, 1, 3, 1, 1).bool()
+        masks = masks.expand_as(states)
+        expanded_means = means.expand_as(states)
+        expanded_stds = stds.expand_as(states)
+
+        states[~masks] = states[~masks] - expanded_means[~masks]
+        states[~masks] = states[~masks] / expanded_stds[~masks]
 
         return states
 
@@ -256,7 +261,7 @@ def plot_all_patches():
     patch_size = (16, 16)
 
     seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/test", resolution=210, patch_size=patch_size, stride=patch_size,
-                            seq_len=10, seq_interval=2, normalize=False, mode="test")
+                            seq_len=10, seq_interval=2, normalize=True, mode="test")
 
     ds = DataLoader(seq_dl, batch_size=8)
 
@@ -269,15 +274,15 @@ def plot_all_patches():
     N_x, N_y = seq_dl.N_x_patch, seq_dl.N_y_patch
     print(f'{N_x = }, {N_y = }')
 
-    plot_batch = 2
+    plot_batch = 0
     p_shows = state[plot_batch, 0, :, 0]
     plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
     p_shows = diffs[plot_batch, 0, :, 0]
     plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
-    # p_shows = next_state[plot_batch, 0, :, 0]
-    # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
+    p_shows = next_state[plot_batch, 0, :, 0]
+    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
 
 if __name__ == '__main__':
