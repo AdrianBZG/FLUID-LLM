@@ -105,8 +105,8 @@ def main():
 
     name = args.name
 
-    train_dataset = AirfoilDataset(args.dataset_path, mode="train", window_length=args.horizon_train, with_cluster=False)
-    valid_dataset = AirfoilDataset(args.dataset_path, mode="valid", window_length=args.horizon_val, with_cluster=False)
+    train_dataset = AirfoilDataset(args.dataset_path, mode="train", normalize=True, window_length=args.horizon_train, with_cluster=False)
+    valid_dataset = AirfoilDataset(args.dataset_path, mode="valid", normalize=True, window_length=args.horizon_val, with_cluster=False)
 
     train_dataloader = DataLoader(train_dataset, batch_size=batchsize, shuffle=True, num_workers=8, pin_memory=True, collate_fn=collate)
     valid_dataloader = DataLoader(valid_dataset, batch_size=batchsize, shuffle=False, num_workers=8, pin_memory=True, collate_fn=collate)

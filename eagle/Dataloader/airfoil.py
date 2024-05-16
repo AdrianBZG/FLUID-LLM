@@ -72,7 +72,28 @@ class AirfoilDataset(Dataset):
             node_type = one_hot(node_type, num_classes=9).squeeze(-2)
 
         if self.do_normalization:
-            velocity, pressure = self.normalize(velocity, pressure)
+            s0_mean, s0_std = 170.1, 71.06
+            s1_mean, s1_std = -1.183, 46.73
+            s2_mean, s2_std = 9.935e+04, 8964
+
+            v_means = torch.tensor([s0_mean, s1_mean])
+            v_stds = torch.tensor([50, 50])
+
+            velocity = (velocity - v_means) / v_stds
+
+            p_means = torch.tensor([s2_mean, s2_mean])
+            p_stds = torch.tensor([s2_std, s2_std])
+
+            pressure = (pressure - p_means) / p_stds
+            # # Normalise states
+            # masks = masks.unsqueeze(2).repeat(1, 1, 3, 1, 1).bool()
+            # masks = masks.expand_as(states)
+            # expanded_means = means.expand_as(states)
+            # expanded_stds = stds.expand_as(states)
+            #
+            # states[~masks] = states[~masks] - expanded_means[~masks]
+            # states[~masks] = states[~masks] / expanded_stds[~masks]
+            #velocity, pressure = self.normalize(velocity, pressure)
 
         output = {'mesh_pos': mesh_pos,
                   'edges': edges,
@@ -100,41 +121,41 @@ class AirfoilDataset(Dataset):
 
         return output
 
-    def normalize(self, velocity=None, pressure=None):
-        if pressure is not None:
-            pressure_shape = pressure.shape
-            mean = torch.tensor([0.8845, -0.0002054]).to(pressure.device)
-            std = torch.tensor([0.5875, 0.1286]).to(pressure.device)
-            pressure = pressure.reshape(-1, 2)
-            pressure = (pressure - mean) / std
-            pressure = pressure.reshape(pressure_shape)
-        if velocity is not None:
-            velocity_shape = velocity.shape
-            mean = torch.tensor([0.04064, 0.04064]).to(velocity.device).view(-1, 2)
-            std = torch.tensor([0.2924, 0.2924]).to(velocity.device).view(-1, 2)
-            velocity = velocity.reshape(-1, 2)
-            velocity = (velocity - mean) / std
-            velocity = velocity.reshape(velocity_shape)
-
-        return velocity, pressure
-
-    def denormalize(self, velocity=None, pressure=None):
-        if pressure is not None:
-            pressure_shape = pressure.shape
-            mean = torch.tensor([0.8845, -0.0002054]).to(pressure.device)
-            std = torch.tensor([0.5875, 0.1286]).to(pressure.device)
-            pressure = pressure.reshape(-1, 2)
-            pressure = (pressure * std) + mean
-            pressure = pressure.reshape(pressure_shape)
-        if velocity is not None:
-            velocity_shape = velocity.shape
-            mean = torch.tensor([0.04064, 0.04064]).to(velocity.device).view(-1, 2)
-            std = torch.tensor([0.2924, 0.2924]).to(velocity.device).view(-1, 2)
-            velocity = velocity.reshape(-1, 2)
-            velocity = velocity * std + mean
-            velocity = velocity.reshape(velocity_shape)
-
-        return velocity, pressure
+    # def normalize(self, velocity=None, pressure=None):
+    #     if pressure is not None:
+    #         pressure_shape = pressure.shape
+    #         mean = torch.tensor([0.8845, -0.0002054]).to(pressure.device)
+    #         std = torch.tensor([0.5875, 0.1286]).to(pressure.device)
+    #         pressure = pressure.reshape(-1, 2)
+    #         pressure = (pressure - mean) / std
+    #         pressure = pressure.reshape(pressure_shape)
+    #     if velocity is not None:
+    #         velocity_shape = velocity.shape
+    #         mean = torch.tensor([0.04064, 0.04064]).to(velocity.device).view(-1, 2)
+    #         std = torch.tensor([0.2924, 0.2924]).to(velocity.device).view(-1, 2)
+    #         velocity = velocity.reshape(-1, 2)
+    #         velocity = (velocity - mean) / std
+    #         velocity = velocity.reshape(velocity_shape)
+    #
+    #     return velocity, pressure
+    #
+    # def denormalize(self, velocity=None, pressure=None):
+    #     if pressure is not None:
+    #         pressure_shape = pressure.shape
+    #         mean = torch.tensor([0.8845, -0.0002054]).to(pressure.device)
+    #         std = torch.tensor([0.5875, 0.1286]).to(pressure.device)
+    #         pressure = pressure.reshape(-1, 2)
+    #         pressure = (pressure * std) + mean
+    #         pressure = pressure.reshape(pressure_shape)
+    #     if velocity is not None:
+    #         velocity_shape = velocity.shape
+    #         mean = torch.tensor([0.04064, 0.04064]).to(velocity.device).view(-1, 2)
+    #         std = torch.tensor([0.2924, 0.2924]).to(velocity.device).view(-1, 2)
+    #         velocity = velocity.reshape(-1, 2)
+    #         velocity = velocity * std + mean
+    #         velocity = velocity.reshape(velocity_shape)
+    #
+    #     return velocity, pressure
 
 
 def get_data(path, window_length, mode):

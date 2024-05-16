@@ -1,7 +1,8 @@
 import os
 import torch
 import torch.nn as nn
-from Dataloader.MGN import EagleMGNDataset
+#from Dataloader.MGN import EagleMGNDataset
+from Dataloader.airfoil import AirfoilDataset
 import numpy as np
 from torch.utils.data import DataLoader
 from Models.MeshGraphNet import MeshGraphNet
@@ -11,11 +12,11 @@ from matplotlib import pyplot as plt
 from matplotlib import tri
 from src.dataloader.mesh_utils import to_grid, get_mesh_interpolation
 from eagle_utils import get_nrmse, plot_imgs, plot_preds
-
+torch.set_float32_matmul_precision('high')
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_path', default='/home/bubbles/Documents/LLM_Fluid/ds/MGN/cylinder_dataset/', type=str, help="Dataset location")
-parser.add_argument('--n_processor', default=15, type=int, help="Number of chained GNN layers")
-parser.add_argument('--name', default='mgn_test', type=str, help="Name for saving/loading weights")
+parser.add_argument('--dataset_path', default='/mnt/StorageDisk/fluid_ds/meshgraphnets/airfoil_dataset', type=str, help="Dataset location")
+parser.add_argument('--n_processor', default=10, type=int, help="Number of chained GNN layers")
+parser.add_argument('--name', default='airfoil', type=str, help="Name for saving/loading weights")
 args = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,8 +27,8 @@ BATCHSIZE = 1
 @torch.inference_mode()
 def evaluate():
     print(args)
-    length = 251
-    dataset = EagleMGNDataset(args.dataset_path, mode="valid", window_length=length, with_cluster=False, normalize=False, with_cells=True)
+    length = 27
+    dataset = AirfoilDataset(args.dataset_path, mode="valid", window_length=length, with_cluster=False, normalize=True, with_cells=True)
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False, pin_memory=True)
     model = MeshGraphNet(apply_noise=True, state_size=4, N=args.n_processor).to(device)
@@ -61,9 +62,11 @@ def evaluate():
 
         rmse = get_nrmse(state, state_hat, mesh_pos, x['cells'])
         rmses.append(rmse)
-        # plot_imgs(state, state_hat, mesh_pos, faces, plot_t)
-        # plot_preds(mesh_pos, velocity_hat, velocity, 0)
-        # plot_preds(mesh_pos, velocity_hat, velocity, 48)
+
+        # print(f'{state.shape = }, {state_hat.shape = }, {state.shape = }, {x["cells"].shape = }')
+        # plot_imgs(state, state_hat, mesh_pos, x['cells'], plot_t)
+        plot_preds(mesh_pos, state_hat, state, 24)
+        # exit(4)
 
         vel_error = velocity[0] * mask[0] - velocity_hat[0] * mask[0]
         pres_error = pressure[0] * mask[0] - pressure_hat[0] * mask[0]
