@@ -153,8 +153,31 @@ def get_data(path, window_length, mode):
 
     P = np.repeat(P, 2, axis=-1)
     pos = np.repeat(pos[np.newaxis], window_length, axis=0)
-    faces = np.repeat(faces[np.newaxis], window_length, axis=0)
     node_type = np.repeat(node_type[np.newaxis], window_length, axis=0)
+
+    # Remove outer region
+    x_mask = (pos[:, :, 0] > -.5) & (pos[:, :, 0] < 2)
+    y_mask = (pos[:, :, 1] > -.75) & (pos[:, :, 1] < 1)
+    mask = x_mask & y_mask
+    mask = mask[0]
+
+    pos = pos[:, mask]
+    V = V[:,mask]
+    P = P[:,mask]
+    node_type = node_type[:, mask]
+
+    # Filter faces
+    wanted_nodes = np.squeeze(np.nonzero(mask))
+    # Make a mapping from all nodes to wanted nodes, unwanted nodes are set to 0
+    all_nodes = np.zeros(len(mask), dtype=np.int64)
+    all_nodes[mask] = np.arange(len(wanted_nodes), dtype=np.int64)
+
+    # Filter out faces that are not in the mask
+    face_mask = np.isin(faces, wanted_nodes).all(axis=1)
+    faces = faces[face_mask]
+    faces = all_nodes[faces]
+
+    faces = np.repeat(faces[np.newaxis], window_length, axis=0)
 
     return pos, faces, node_type, t, V, P
 
@@ -224,7 +247,7 @@ if __name__ == "__main__":
 
     train_dataset = AirfoilDataset("./ds/MGN/airfoil_dataset", mode="train", window_length=6, with_cluster=True,
                                     n_cluster=0, normalize=True)
-    train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4,
+    train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True,
                                   pin_memory=True, collate_fn=collate)
 
     for i, sample in enumerate(train_dataloader):
@@ -246,11 +269,7 @@ if __name__ == "__main__":
         # Create a Delaunay triangulation
         triang = mtri.Triangulation(mesh_pos[0, 0, :, 0], mesh_pos[0, 0,:, 1])
         plt.tripcolor(triang, plot_V)
-        plt.xlim([-1, 2])
-        plt.ylim([-1, 1])
         plt.show()
-        print(V.shape)
-        print(edges.shape)
 
         exit(4)
 

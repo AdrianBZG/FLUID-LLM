@@ -275,8 +275,8 @@ def plot_all_patches():
     N_x, N_y = seq_dl.N_x_patch, seq_dl.N_y_patch
 
     print(state.shape )
-    plot_batch = 0
-    p_shows = state[plot_batch, 0, :, 0]
+    plot_batch = 3
+    p_shows = state[plot_batch, 0, :, 2]
     plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
     # p_shows = diffs[plot_batch, 0, :, 0]
