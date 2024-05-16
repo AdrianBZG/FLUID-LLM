@@ -77,6 +77,7 @@ class AirfoilDataset(Dataset):
         """
 
         to_patches = self._get_full_seq(save_file, step_num)
+        to_patches = to_patches[:, :, :, ::-1].copy()
         to_patches = torch.from_numpy(to_patches).float()
 
         patches = self._patch(to_patches)
@@ -163,8 +164,8 @@ class AirfoilDataset(Dataset):
         faces = save_data['cells']
 
         # Remove outer region
-        x_mask = (pos[:, 0] > -.75) & (pos[:, 0] < 3)
-        y_mask = (pos[:, 1] > -1.) & (pos[:, 1] < 1.5)
+        x_mask = (pos[:, 0] > -.5) & (pos[:, 0] < 2)
+        y_mask = (pos[:, 1] > -.75) & (pos[:, 1] < 1)
         mask = x_mask & y_mask
 
         pos = pos[mask]
@@ -260,7 +261,7 @@ class AirfoilDataset(Dataset):
 def plot_all_patches():
     patch_size = (16, 16)
 
-    seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/test", resolution=210, patch_size=patch_size, stride=patch_size,
+    seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/valid", resolution=210, patch_size=patch_size, stride=patch_size,
                             seq_len=10, seq_interval=2, normalize=True, mode="test")
 
     ds = DataLoader(seq_dl, batch_size=8)
@@ -272,17 +273,17 @@ def plot_all_patches():
         break
 
     N_x, N_y = seq_dl.N_x_patch, seq_dl.N_y_patch
-    print(f'{N_x = }, {N_y = }')
 
+    print(state.shape )
     plot_batch = 0
     p_shows = state[plot_batch, 0, :, 0]
     plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
-    p_shows = diffs[plot_batch, 0, :, 0]
-    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
-
-    p_shows = next_state[plot_batch, 0, :, 0]
-    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
+    # p_shows = diffs[plot_batch, 0, :, 0]
+    # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
+    #
+    # p_shows = next_state[plot_batch, 0, :, 0]
+    # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
 
 if __name__ == '__main__':
