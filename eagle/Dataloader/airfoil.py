@@ -156,8 +156,8 @@ def get_data(path, window_length, mode):
     node_type = np.repeat(node_type[np.newaxis], window_length, axis=0)
 
     # Remove outer region
-    x_mask = (pos[:, :, 0] > -.5) & (pos[:, :, 0] < 2)
-    y_mask = (pos[:, :, 1] > -.75) & (pos[:, :, 1] < 1)
+    x_mask = (pos[:, :, 0] > -.42) & (pos[:, :, 0] < 1.71)
+    y_mask = (pos[:, :, 1] > -.64) & (pos[:, :, 1] < 0.85)
     mask = x_mask & y_mask
     mask = mask[0]
 
