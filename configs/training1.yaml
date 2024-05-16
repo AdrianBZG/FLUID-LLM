@@ -25,7 +25,7 @@ optimizer: adamw
 learning_rate: 10e-4
 weight_decay: 1.0e-5
 loss_function: ['mae', 'mse']
-loss_weighting: [0.3, 10]
+loss_weighting: [0.2, 10]
 schedule_epoch: 50
 schedule_gamma: 0.75
 
