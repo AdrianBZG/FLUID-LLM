@@ -165,7 +165,7 @@ class AirfoilDataset(Dataset):
 
         # Remove outer region
         x_mask = (pos[:, 0] > -.5) & (pos[:, 0] < 2)
-        y_mask = (pos[:, 1] > -.75) & (pos[:, 1] < 1)
+        y_mask = (pos[:, 1] > -.75) & (pos[:, 1] < 0.75)
         mask = x_mask & y_mask
 
         pos = pos[mask]
@@ -264,7 +264,7 @@ def plot_all_patches():
     seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/valid", resolution=210, patch_size=patch_size, stride=patch_size,
                             seq_len=10, seq_interval=2, normalize=True, mode="test")
 
-    ds = DataLoader(seq_dl, batch_size=8)
+    ds = DataLoader(seq_dl, batch_size=8, shuffle=True)
 
     for batch in ds:
         state, next_state, diffs, mask, pos_id = batch
@@ -275,8 +275,8 @@ def plot_all_patches():
     N_x, N_y = seq_dl.N_x_patch, seq_dl.N_y_patch
 
     print(state.shape )
-    plot_batch = 3
-    p_shows = state[plot_batch, 0, :, 2]
+    plot_batch = 0
+    p_shows = state[plot_batch, 0, :, 0]
     plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
     # p_shows = diffs[plot_batch, 0, :, 0]
@@ -291,5 +291,5 @@ if __name__ == '__main__':
     from dataloader.mesh_utils import plot_patches
     from utils import set_seed
 
-    set_seed()
+    # set_seed()
     plot_all_patches()
