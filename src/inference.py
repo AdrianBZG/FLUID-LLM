@@ -14,21 +14,21 @@ from utils_model import calc_n_rmse, patch_to_img, get_data_loader
 from models.model import MultivariateTimeLLM
 import torch.nn.functional as F
 
-from dataloader.simple_dataloader import MGNDataset
+from dataloader.airfoil_ds import AirfoilDataset
 
 logging.basicConfig(level=logging.INFO,
                     format=f'[{__name__}:%(levelname)s] %(message)s')
 
 
 def get_eval_dl(model, bs, seq_len):
-    ds = MGNDataset(load_dir=f"./ds/MGN/cylinder_dataset/valid",
-                    resolution=model.config['resolution'],
-                    patch_size=model.config['patch_size'],
-                    stride=model.config['stride'],
-                    seq_len=seq_len,
-                    seq_interval=model.config['seq_interval'],
-                    mode='valid',
-                    normalize=model.config['normalize_ds'])
+    ds = AirfoilDataset(load_dir=f"./ds/MGN/airfoil_dataset/valid",
+                        resolution=model.config['resolution'],
+                        patch_size=model.config['patch_size'],
+                        stride=model.config['stride'],
+                        seq_len=seq_len,
+                        seq_interval=model.config['seq_interval'],
+                        mode='valid',
+                        normalize=model.config['normalize_ds'])
 
     dl = DataLoader(ds, batch_size=bs, pin_memory=True)
     return dl
@@ -142,7 +142,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     if True:
         true_states, true_diffs, pred_states, pred_diffs = first_batch
         # Plot diffs
-        fig, axs = plt.subplots(3, 2, figsize=(20, 9))
+        fig, axs = plt.subplots(3, 2, figsize=(15, 9))
         fig.suptitle(f'Differences, step {plot_step}')
         for i, ax in enumerate(axs):
             img_1 = true_diffs[batch_num, plot_step, i].cpu()
@@ -155,7 +155,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         fig.show()
 
         # Plot states
-        fig, axs = plt.subplots(3, 2, figsize=(20, 9))
+        fig, axs = plt.subplots(3, 2, figsize=(15, 9))
         fig.suptitle(f'States, step {plot_step}')
         for i, ax in enumerate(axs):
             img_1 = true_states[batch_num, plot_step, i].cpu()
@@ -170,12 +170,12 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
 
 def main():
     load_no = -1
-    save_epoch = 160
+    save_epoch = 180
     seq_len = 27
     bs = 16
 
     plot_step = 25
-    plot_batch_num = 0
+    plot_batch_num = 1
 
     set_seed()
 
