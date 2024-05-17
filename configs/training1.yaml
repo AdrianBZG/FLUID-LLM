@@ -30,7 +30,8 @@ schedule_epoch: 50
 schedule_gamma: 0.75
 
 # Train modifications
-pressure_weight: 0.1
+pressure_weight: 0.5
+
 diff_scale_factor: 0.1   # Scale factor for diffs
 loss_norm_eps: 0.1
 channel_independent: false
@@ -54,9 +55,9 @@ encoder_params:
 decoder_params:
     type: MLPGNN
     gnn_dim: 32
-    gnn_hid_dim: 32
+    gnn_hid_dim: 48
     gnn_layers: 3
-    gnn_heads: 1
+    gnn_heads: 2
     mlp_hid_dim: 512
     dropout: 0
 
