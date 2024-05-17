@@ -16,7 +16,7 @@ parser.add_argument('--epoch', default=1000, type=int, help="Number of epochs, s
 parser.add_argument('--lr', default=1e-4, type=float, help="Learning rate")
 parser.add_argument('--dataset_path', default='/mnt/StorageDisk/fluid_ds/meshgraphnets/airfoil_dataset', type=str, help="Dataset location")
 parser.add_argument('--w_pressure', default=0.1, type=float, help="Weighting for the pressure term in the loss")
-parser.add_argument('--horizon_val', default=10, type=int, help="Number of timestep to validate on")
+parser.add_argument('--horizon_val', default=5, type=int, help="Number of timestep to validate on")
 parser.add_argument('--horizon_train', default=3, type=int, help="Number of timestep to train on")
 parser.add_argument('--n_processor', default=10, type=int, help="Number of chained GNN layers")
 parser.add_argument('--noise_std', default=2e-2, type=float,
@@ -26,7 +26,7 @@ args = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MSE = nn.MSELoss()
-BATCHSIZE = 2
+BATCHSIZE = 3
 
 
 def collate(X):

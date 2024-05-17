@@ -52,7 +52,7 @@ def evaluate():
         mask = torch.ones_like(mesh_pos)[..., 0]
 
         state = torch.cat([velocity, pressure], dim=-1)
-        state_hat, _, _ = model(mesh_pos, edges, state, node_type)
+        state_hat, output_hat, _ = model(mesh_pos, edges, state, node_type)
 
         velocity = velocity[:, 1:]
         pressure = pressure[:, 1:]
@@ -64,9 +64,12 @@ def evaluate():
         rmses.append(rmse)
 
         # print(f'{state.shape = }, {state_hat.shape = }, {state.shape = }, {x["cells"].shape = }')
-        # plot_imgs(state, state_hat, mesh_pos, x['cells'], plot_t)
-        plot_preds(mesh_pos, state_hat, state, 24)
-        # exit(4)
+        if i > 8:
+            true_diffs = state[:, 1:] - state[:, :-1]
+            plot_preds(mesh_pos, state_hat, state, 13)
+            plot_preds(mesh_pos, output_hat, true_diffs, 13)
+
+            exit(4)
 
         vel_error = velocity[0] * mask[0] - velocity_hat[0] * mask[0]
         pres_error = pressure[0] * mask[0] - pressure_hat[0] * mask[0]
