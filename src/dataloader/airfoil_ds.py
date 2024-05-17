@@ -9,6 +9,7 @@ import time
 import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
+import natsort
 
 from dataloader.mesh_utils import to_grid, get_mesh_interpolation, plot_mesh
 
@@ -41,7 +42,7 @@ class AirfoilDataset(Dataset):
         self.normalize = normalize
         self.noise = noise
 
-        self.save_files = sorted([f for f in os.listdir(f"{self.load_dir}/") if f.endswith('.pkl')])
+        self.save_files = natsort.natsorted([f for f in os.listdir(f"{self.load_dir}/") if f.endswith('.pkl')])
 
         # Load a random file to get min and max values and patch size
         triang, tri_index, grid_x, grid_y, save_data = self._load_step(self.save_files[1])
@@ -157,7 +158,6 @@ class AirfoilDataset(Dataset):
 
     def _load_step(self, save_file):
         """ Load save file from disk and calculate mesh interpolation triangles"""
-
         with open(f"{self.load_dir}/{save_file}", 'rb') as f:
             save_data = pickle.load(f)  # ['cells', 'mesh_pos', 'velocity', 'pressure', 'density' ]
         pos = save_data['mesh_pos']
@@ -261,10 +261,10 @@ class AirfoilDataset(Dataset):
 def plot_all_patches():
     patch_size = (16, 16)
 
-    seq_dl = AirfoilDataset(load_dir="./ds/MGN/airfoil_dataset/valid", resolution=210, patch_size=patch_size, stride=patch_size,
-                            seq_len=10, seq_interval=2, normalize=True, mode="test")
+    seq_dl = AirfoilDataset(load_dir="/mnt/StorageDisk/fluid_ds/meshgraphnets/airfoil_dataset/valid", resolution=210, patch_size=patch_size, stride=patch_size,
+                            seq_len=10, seq_interval=2, normalize=True, mode="valid")
 
-    ds = DataLoader(seq_dl, batch_size=8, shuffle=True)
+    ds = DataLoader(seq_dl, batch_size=9, shuffle=False)
 
     for batch in ds:
         state, next_state, diffs, mask, pos_id = batch
@@ -275,12 +275,12 @@ def plot_all_patches():
     N_x, N_y = seq_dl.N_x_patch, seq_dl.N_y_patch
     print(f'{N_x = }, {N_y = }')
 
-    plot_batch = 0
+    plot_batch = 8
     p_shows = state[plot_batch, 0, :, 0]
     plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
-    # p_shows = diffs[plot_batch, 0, :, 0]
-    # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
+    p_shows = diffs[plot_batch, 0, :, 0]
+    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
     #
     # p_shows = next_state[plot_batch, 0, :, 0]
     # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))

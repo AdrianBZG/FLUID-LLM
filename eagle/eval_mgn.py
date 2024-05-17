@@ -27,11 +27,11 @@ BATCHSIZE = 1
 @torch.inference_mode()
 def evaluate():
     print(args)
-    length = 27
+    length = 52
     dataset = AirfoilDataset(args.dataset_path, mode="valid", window_length=length, with_cluster=False, normalize=True, with_cells=True)
 
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False, pin_memory=True)
-    model = MeshGraphNet(apply_noise=True, state_size=4, N=args.n_processor).to(device)
+    model = MeshGraphNet(apply_noise=False, state_size=4, N=args.n_processor).to(device)
 
     model.load_state_dict(torch.load(f"./eagle/trained_models/meshgraphnet/{args.name}.nn", map_location=device))
 
@@ -64,12 +64,11 @@ def evaluate():
         rmses.append(rmse)
 
         # print(f'{state.shape = }, {state_hat.shape = }, {state.shape = }, {x["cells"].shape = }')
-        if i > 8:
-            true_diffs = state[:, 1:] - state[:, :-1]
-            plot_preds(mesh_pos, state_hat, state, 13)
-            plot_preds(mesh_pos, output_hat, true_diffs, 13)
-
-            exit(4)
+        # if i == 8:
+        #     true_diffs = state[:, 1:] - state[:, :-1]
+        #     plot_preds(mesh_pos, state_hat, state, 25)
+        #     plot_preds(mesh_pos, output_hat, true_diffs, 25)
+        #     exit(4)
 
         vel_error = velocity[0] * mask[0] - velocity_hat[0] * mask[0]
         pres_error = pressure[0] * mask[0] - pressure_hat[0] * mask[0]
