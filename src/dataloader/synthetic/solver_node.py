@@ -9,11 +9,11 @@ from dataloader.synthetic.pdes import PDEs
 
 
 class WaveConfig:
-    Nx, Ny = 240, 60  # Grid size
-    Lx, Ly = 2.4, 0.6  # Domain size
+    Nx, Ny = 100, 100  # Grid size
+    Lx, Ly = 0.5, 0.5  # Domain size
     dx = Lx / (Nx - 1)
     dy = Ly / (Ny - 1)
-    T = 0.2  # Final time
+    T = 0.1  # Final time
     Nt = 21  # Number of time steps
     stepsize = 0.005
 
@@ -127,7 +127,6 @@ class PDESolver2D:
 # Example usage
 if __name__ == "__main__":
     import time
-    from utils import set_seed
 
     cfg = WaveConfig()
     solver = PDESolver2D(cfg)

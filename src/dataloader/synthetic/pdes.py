@@ -32,7 +32,7 @@ class PDEs:
         """
         Returns the time derivative of the input field according to the wave equation.
         """
-        dampening = 0.2
+        dampening = 0.0
 
         d2u_dx2 = self._laplacian(u)  # convolve2d(u, self.kernel_dxdy, mode='same', boundary='symm')
 

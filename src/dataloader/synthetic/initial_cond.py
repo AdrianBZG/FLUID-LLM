@@ -61,7 +61,7 @@ class InitialConditionGenerator:
         """
 
         if wavelength is None:
-            wavelength = np.random.randint(self.min_scale, self.max_scale * 0.75)
+            wavelength = np.random.randint(self.min_scale*1.5, self.max_scale*2)
         if angle is None:
             angle = np.random.randint(0, 180)
         if phase is None:
