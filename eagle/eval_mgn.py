@@ -16,7 +16,7 @@ torch.set_float32_matmul_precision('high')
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset_path', default='./ds/MGN/airfoil_dataset', type=str, help="Dataset location")
 parser.add_argument('--n_processor', default=10, type=int, help="Number of chained GNN layers")
-parser.add_argument('--name', default='airfoil_base', type=str, help="Name for saving/loading weights")
+parser.add_argument('--name', default='airfoil', type=str, help="Name for saving/loading weights")
 args = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
