@@ -29,8 +29,7 @@ schedule_epoch: 50
 schedule_gamma: 0.75
 
 # Train modifications
-pressure_weight: 0.5
-
+pressure_weight: 0.1
 diff_scale_factor: 0.1   # Scale factor for diffs
 loss_norm_eps: 0.1
 channel_independent: false
