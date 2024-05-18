@@ -200,4 +200,21 @@ if __name__ == '__main__':
                         help='Path to save model checkpoints. Defaults to time', default=None)
 
     args = parser.parse_args(sys.argv[1:])
-    main(args)
+    try:
+        main(args)
+    except Exception as e:
+        raise e
+    else:
+        import subprocess
+        time.sleep(1)  # Replace with your actual program logic
+
+        pwd = "nope"
+        # Create the command to shut down the computer
+        shutdown_command = f"cl-asuser shutdown"
+
+        # Execute the command
+        print("Running shutdown command")
+        subprocess.run(shutdown_command, shell=True, check=True)
+        print("Shutdown command run, can still be canceled")
+
+
