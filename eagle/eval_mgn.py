@@ -14,9 +14,9 @@ from src.dataloader.mesh_utils import to_grid, get_mesh_interpolation
 from eagle_utils import get_nrmse, plot_imgs, plot_preds
 torch.set_float32_matmul_precision('high')
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_path', default='/mnt/StorageDisk/fluid_ds/meshgraphnets/airfoil_dataset', type=str, help="Dataset location")
+parser.add_argument('--dataset_path', default='./ds/MGN/airfoil_dataset', type=str, help="Dataset location")
 parser.add_argument('--n_processor', default=10, type=int, help="Number of chained GNN layers")
-parser.add_argument('--name', default='airfoil', type=str, help="Name for saving/loading weights")
+parser.add_argument('--name', default='airfoil_base', type=str, help="Name for saving/loading weights")
 args = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,11 +64,11 @@ def evaluate():
         rmses.append(rmse)
 
         # print(f'{state.shape = }, {state_hat.shape = }, {state.shape = }, {x["cells"].shape = }')
-        # if i == 8:
-        #     true_diffs = state[:, 1:] - state[:, :-1]
-        #     plot_preds(mesh_pos, state_hat, state, 25)
-        #     plot_preds(mesh_pos, output_hat, true_diffs, 25)
-        #     exit(4)
+        if i == 8:
+            true_diffs = state[:, 1:] - state[:, :-1]
+            plot_preds(mesh_pos, state_hat, state, 25)
+            plot_preds(mesh_pos, output_hat, true_diffs, 25)
+            exit(4)
 
         vel_error = velocity[0] * mask[0] - velocity_hat[0] * mask[0]
         pres_error = pressure[0] * mask[0] - pressure_hat[0] * mask[0]

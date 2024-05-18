@@ -13,7 +13,6 @@ lora_config:
   bias: none
   use_dora: True
 half_precision: true
-flash_attention: true
 use_deepspeed: false
 use_bos_token: true
 see_init_state: true
