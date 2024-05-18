@@ -47,7 +47,7 @@ class MeshGraphNet(nn.Module):
 
             next_state[mask, :] = state[:, t][mask, :]
             state_hat.append(next_state)
-            output_hat.append(output_denormalized)
+            output_hat.append(next_output)
 
         state_hat = torch.stack(state_hat, dim=1)
         output_hat = torch.stack(output_hat, dim=1)
