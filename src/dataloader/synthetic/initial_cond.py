@@ -40,7 +40,7 @@ class InitialConditionGenerator:
             center = (np.random.uniform(self.min_scale, self.nx - self.min_scale),
                       np.random.uniform(self.min_scale, self.ny - self.min_scale))
         if sigma is None:
-            sigma = np.random.uniform(self.min_scale / 2, self.max_scale / 5)
+            sigma = np.random.uniform(self.min_scale, self.max_scale / 2)
         if magnitude is None:
             magnitude = np.random.uniform(-1, 1)
 
@@ -61,7 +61,8 @@ class InitialConditionGenerator:
         """
 
         if wavelength is None:
-            wavelength = np.random.randint(self.min_scale*1.5, self.max_scale*2)
+            wavelength = np.random.randint(self.min_scale*4, self.max_scale*2)
+            # print(f'{wavelength = }, {self.min_scale*2}')
         if angle is None:
             angle = np.random.randint(0, 180)
         if phase is None:
@@ -96,13 +97,12 @@ class InitialConditionGenerator:
         """
         Generates a superposition of 'n_waves' plane waves at random angles and wavelengths.
         """
-        norm_const = np.random.uniform(0.2, 1.25)
+        norm_const = np.random.uniform(0.5, 1.25)
 
         result = np.zeros((self.nx, self.ny))
         for _ in range(n_waves):
             result += self.plane_wave()
-        result /= result.max() * norm_const
-
+        result = result / result.max() * norm_const
         return result
 
 

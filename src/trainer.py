@@ -76,7 +76,7 @@ class Trainer:
         - metrics_to_log (dict): A dictionary with the calculated metrics (detached from the computational graph)
         """
         states, next_state, diffs, bc_mask, position_ids = batch
-
+        # print(f'{states.shape = }, {next_state.shape = }, {diffs.shape = }')
         # If fitting diffs, target is diffs. Otherwise, target is next state
         self.model.train()
         # Forward pass
@@ -102,7 +102,7 @@ class Trainer:
             norm_next_state, norm_pred_states = normalise_states(diffs, next_state, pred_state, self.loss_norm_eps, self.norm_channel_independent)
             loss, all_losses = self.loss_fn.forward(preds=norm_pred_states, target=norm_next_state, mask=bc_mask)
         else:
-            loss, all_losses = self.loss_fn.forward(preds=pred_diff, target=diffs, mask=bc_mask)
+            loss, all_losses = self.loss_fn.forward(preds=pred_state, target=next_state, mask=bc_mask)
 
         # Calculate metrics
         with torch.no_grad():

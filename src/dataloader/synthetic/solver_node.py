@@ -10,12 +10,14 @@ from dataloader.synthetic.pdes import PDEs
 
 class WaveConfig:
     Nx, Ny = 100, 100  # Grid size
-    Lx, Ly = 0.5, 0.5  # Domain size
+    Lx, Ly = 1., 1.  # Domain size
     dx = Lx / (Nx - 1)
     dy = Ly / (Ny - 1)
-    T = 0.1  # Final time
-    Nt = 21  # Number of time steps
-    stepsize = 0.005
+    stepsize = 0.01
+
+    def __init__(self, Nt):
+        self.Nt = Nt
+        self.T = Nt * 0.05
 
 
 class PDESolver2D:
@@ -32,7 +34,6 @@ class PDESolver2D:
         - Nx, Ny: Number of grid points in the x and y dimensions.
         - T: Final time for the simulation.
         """
-        self.Lx, self.Ly = cfg.Lx, cfg.Ly
         self.Nx, self.Ny = cfg.Nx, cfg.Ny
         self.Nt = cfg.Nt
         self.dx, self.dy = cfg.dx, cfg.dy
@@ -49,13 +50,18 @@ class PDESolver2D:
         - func: A function of two variables (x and y) that returns the initial state of the system.
         """
         init_cond_gen = InitialConditionGenerator(self.Nx, self.Ny)
-        u_init = init_cond_gen.random_cond()
 
         bc_gen = BoundaryConditionGenerator(self.Nx, self.Ny)
         bc_mask = bc_gen.random_boundary()
 
+        # Initial position
+        u_init = init_cond_gen.random_cond()
         u_init = smooth_transition(u_init, bc_mask, smooth=True)
-        dudt0 = torch.zeros_like(u_init)
+
+        # Initial velocity
+        dudt0 = init_cond_gen.random_cond()
+        dudt0 = smooth_transition(dudt0, bc_mask, smooth=True)
+
         u_init = torch.stack((u_init, dudt0), dim=0)
 
         bc_mask = torch.from_numpy(bc_mask).bool()
@@ -105,7 +111,7 @@ class PDESolver2D:
         """
 
         solution = self.solution
-        u_sol = solution[:, 0]
+        u_sol = solution[:, 1]
 
         vmin, vmax = torch.min(u_sol), torch.max(u_sol)
 

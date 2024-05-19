@@ -1,18 +1,29 @@
 import torch
+from matplotlib import pyplot as plt
 
-# Example 5D tensors
-states = torch.rand(2, 3, 4, 5, 6)  # 5D tensor with shape [2, 3, 4, 5, 6]
-masks = torch.rand(2, 3, 4, 5, 6) > 0.5  # Random boolean mask of the same shape
+def custom_transform(x, C=1.0):
+    """
+    Transforms x to approximate x for small values and C for large values.
 
-# Mean tensor that is smaller and needs to be broadcasted
-# For example, mean for each channel only
-mean_value = 0.5
-means = torch.tensor([mean_value]).view(1, 1, 1, 1, 1)  # Shape [1, 1, 1, 1, 1]
+    Args:
+    - x (Tensor): Input tensor.
+    - C (float): The constant value that the function should approach for large x.
+    - k (float): Scaling factor for the sigmoid function.
 
-# Expand means to the same shape as states
-expanded_means = means.expand_as(states)
+    Returns:
+    - Tensor: Transformed tensor.
+    """
+    sigmoid = torch.sigmoid(x/C) - 0.5
+    transformed_output = sigmoid * C * 4
+    return transformed_output
 
-# Apply the operation
-states[masks] = states[masks] - expanded_means[masks]
 
-print(states)
+# Example usage
+x = torch.linspace(-50, 50, 100)
+transformed_x = custom_transform(x, C=30.0)
+plt.plot(x, transformed_x)
+
+plt.plot(x, x)
+plt.show()
+
+print(transformed_x)

@@ -21,7 +21,7 @@ class PDEs:
         """
         Returns the Laplacian of the input field.
         """
-        d2u_dx2 = convolve2d(u, self.kernel_dxdy, mode='same', boundary='symm')
+        d2u_dx2 = self._laplacian(u)
         dudt = 0.05 * d2u_dx2
         # Boundary Conditions
         dudt[self.bc_mask] = 0
@@ -30,13 +30,14 @@ class PDEs:
 
     def wave_equation(self, u, dudt):
         """
-        Returns the time derivative of the input field according to the wave equation.
+        Returns the time derivative of the input field according to the wave equation. With nonlinear dampening
         """
-        dampening = 0.0
+        dampening = 0.1
 
         d2u_dx2 = self._laplacian(u)  # convolve2d(u, self.kernel_dxdy, mode='same', boundary='symm')
 
-        d2udt2 = d2u_dx2 - dampening * dudt
+        d2udt2 = 0.1 * d2u_dx2 - dampening * dudt
+        d2udt2 = self._sigmoid_clamp(d2udt2, C=20)
 
         # Boundary Conditions
         dudt[self.bc_mask] = 0
@@ -48,8 +49,7 @@ class PDEs:
         # plt.show()
         # plt.imshow(d2u_dx2)
         # plt.show()
-        # print(d2u_dx2.min(), d2u_dx2.max())
-        # exit(5)
+
         return dudt, d2udt2
 
     def _laplacian(self, u):
@@ -62,3 +62,10 @@ class PDEs:
         result = F.conv2d(u, self.kernel_dxdy)
 
         return result.squeeze()
+
+    def _sigmoid_clamp(self, x, C=1.0):
+        sigmoid = torch.sigmoid(x/C) - 0.5
+        transformed_output = sigmoid * C * 4
+        return transformed_output
+
+

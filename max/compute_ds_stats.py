@@ -1,18 +1,13 @@
-from src.dataloader.airfoil_ds import AirfoilDataset
-from src.utils import load_yaml_from_file
+from src.dataloader.synthetic.synth_dl import SynthDS
 import numpy as np
 
 
-def get_data_loader(config):
-    ds = AirfoilDataset(load_dir=f"{config['load_dir']}/train",
-                        resolution=config['resolution'],
-                        patch_size=config['patch_size'],
-                        stride=config['stride'],
-                        seq_len=300,
-                        seq_interval=2,
-                        normalize=True,
-                        mode="valid"
-                        )
+def get_data_loader():
+    ds = SynthDS(patch_size=[16, 16],
+                 stride=[16, 16],
+                 seq_len=10,
+                 mode="train"
+                 )
     return ds
 
 
@@ -34,8 +29,7 @@ def get_std(existingAggregate):
 
 
 def main():
-    config = load_yaml_from_file("./configs/training1.yaml")
-    ds = get_data_loader(config)
+    ds = get_data_loader()
 
     # Joint variance
     state_aggs, diff_aggs = [], []
@@ -46,9 +40,9 @@ def main():
     # Average variance
     state_vars, diff_vars = [[] for _ in range(3)], [[] for _ in range(3)]
 
-    for load_no in range(0, 1000, 10): # range(0, 1000, 1):  #
+    for load_no in range(0, 1000, 10):  # range(0, 1000, 1):  #
 
-        state, _, diff, mask, _ = ds.ds_get(load_no, step_num=0)
+        state, _, diff, mask, _ = ds.ds_get()
 
         for j in range(3):
             s, d = state[:, :, j], diff[:, :, j]

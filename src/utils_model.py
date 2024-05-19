@@ -2,20 +2,19 @@ import torch
 import torch.nn.functional as F
 from dataloader.ds_props import DSProps
 # from dataloader.simple_dataloader import MGNDataset
-from dataloader.airfoil_ds import AirfoilDataset
+# from dataloader.airfoil_ds import AirfoilDataset
+from dataloader.synthetic.synth_dl import SynthDS
 from torch.utils.data import DataLoader
 
 
 def get_data_loader(config, mode="train"):
-    ds = AirfoilDataset(load_dir=f'{config["load_dir"]}/{mode}',
-                    resolution=config['resolution'],
-                    patch_size=config['patch_size'],
-                    stride=config['stride'],
-                    seq_len=config['seq_len'],
-                    seq_interval=config['seq_interval'],
-                    mode=mode,
-                    normalize=config['normalize_ds']
-                    )
+    ds = SynthDS(
+        patch_size=config['patch_size'],
+        stride=config['stride'],
+        seq_len=config['seq_len'],
+        mode=mode,
+        normalize=config['normalize'],
+    )
 
     dl = DataLoader(ds,
                     batch_size=config['batch_size'],
@@ -26,7 +25,7 @@ def get_data_loader(config, mode="train"):
 
     N_x_patch, N_y_patch = ds.N_x_patch, ds.N_y_patch
     seq_len = ds.seq_len - 1
-    ds_props = DSProps(Nx_patch=N_x_patch, Ny_patch=N_y_patch, patch_size=ds.patch_size,
+    ds_props = DSProps(Nx_patch=N_x_patch, Ny_patch=N_y_patch, patch_size=(16, 16),
                        seq_len=seq_len)
     return dl, ds_props
 
@@ -106,7 +105,7 @@ def normalise_diffs(targs, preds, norm_const, channel_indep):
     if channel_indep:
         targ_std = targs.std(dim=(-1, -2, -4), keepdim=True)  # Std pixels and seq_len
     else:
-        targ_std = targs.std(dim=(-1, -2, -3, -4), keepdim=True)    # Std pixels, channels and seq_len
+        targ_std = targs.std(dim=(-1, -2, -3, -4), keepdim=True)  # Std pixels, channels and seq_len
     targs = targs / (targ_std + norm_const)
     preds = preds / (targ_std + norm_const)
 
