@@ -14,19 +14,18 @@ from utils_model import calc_n_rmse, patch_to_img, get_data_loader
 from models.model import MultivariateTimeLLM
 import torch.nn.functional as F
 
-from dataloader.airfoil_ds import AirfoilDataset
+from dataloader.synthetic.synth_dl import SynthDS
 
 logging.basicConfig(level=logging.INFO,
                     format=f'[{__name__}:%(levelname)s] %(message)s')
 
 
 def get_eval_dl(model, bs, seq_len):
-    ds = AirfoilDataset(load_dir=f"./ds/MGN/airfoil_dataset/valid",
-                        resolution=model.config['resolution'],
+    ds = SynthDS(
+
                         patch_size=model.config['patch_size'],
                         stride=model.config['stride'],
                         seq_len=seq_len,
-                        seq_interval=model.config['seq_interval'],
                         mode='valid',
                         normalize=model.config['normalize_ds'])
 

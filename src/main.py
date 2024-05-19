@@ -154,7 +154,7 @@ def run_everything(train_cfg, autoreg_dl, gen_dl, valid_dl, model_components, ar
     # Wandb, save and logging
     if train_cfg['enable_wandb'] is False:
         os.environ['WANDB_MODE'] = 'disabled'
-    wandb.init(project="llm4multivariatets", entity="adrianbzgteam", tags=["airfoil"], config=train_cfg)
+    wandb.init(project="llm4multivariatets", entity="adrianbzgteam", tags=["synthetic"], config=train_cfg)
     wandb.save(args.config_path)
     run_name = wandb.run.name
 
