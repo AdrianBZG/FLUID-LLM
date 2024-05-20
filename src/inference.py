@@ -149,8 +149,6 @@ def main():
 
     # Run test_generate
     test_generate(model, dl, plot_step, plot_batch_num)
-    # test_step(model, dl, plot_step, batch_num)
-    # get_ds_stats(model, dl)
 
 
 if __name__ == '__main__':
