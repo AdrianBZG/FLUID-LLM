@@ -53,7 +53,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     model.eval()
 
     start_step = 5
-    ctx_states = 3
+    ctx_states = 1
     pred_steps = 10
     start_cut = start_step - ctx_states
     end_state = pred_steps + ctx_states if ctx_states == 1 else pred_steps + ctx_states - 1
@@ -73,8 +73,8 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         pred_states, pred_diffs = model.gen_seq(batch, pred_steps=pred_steps, start_state=ctx_states)
         pred_states = pred_states[:, :-1]
 
-        print(f'{pred_states.shape = }')
-        print(pred_states.std(dim=(0, 2, 3, 4)) )
+        # print(f'{pred_states.shape = }')
+        # print(pred_states.std(dim=(0, 2, 3, 4)) )
 
         true_states = patch_to_img(states, model.ds_props)
         true_diffs = patch_to_img(diffs, model.ds_props)
@@ -89,7 +89,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         if first_batch is None:
             first_batch = (true_states, true_diffs, pred_states, pred_diffs)
 
-        break
+        # break
 
     N_rmses = torch.cat(N_rmses, dim=0)
     N_rmse = torch.mean(N_rmses, dim=0)
