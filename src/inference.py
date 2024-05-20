@@ -53,7 +53,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     model.eval()
 
     start_step = 5
-    ctx_states = 1
+    ctx_states = 3
     pred_steps = 10
     start_cut = start_step - ctx_states
     end_state = pred_steps + ctx_states if ctx_states == 1 else pred_steps + ctx_states - 1
