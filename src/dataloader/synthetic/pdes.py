@@ -7,9 +7,10 @@ from scipy.special import erf
 
 
 class PDEs:
-    def __init__(self, dx, dy, bc_mask):
+    def __init__(self, dx, dy, bc_mask, rng_scale=5):
         self.dx, self.dy = dx, dy
         self.bc_mask = bc_mask
+        self.rng_scale = rng_scale
 
         # Convolution kernels for second derivatives
         self.kernel_dx2 = np.array([[1, -2, 1]]) / self.dx ** 2
@@ -23,7 +24,7 @@ class PDEs:
 
     def set_params(self):
 
-        self.C =  np.random.rand() * 10 * 0 + 0
+        self.C =  np.random.rand() * self.rng_scale #  * 0 + 4
 
     def wave_equation(self, u, dudt):
         """

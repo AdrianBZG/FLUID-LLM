@@ -182,8 +182,6 @@ class MultivariateTimeLLM(nn.Module):
             min_t = seq_pos_ids[:, :, :, 2].min()
             seq_pos_ids[:, :, :, 2] = seq_pos_ids[:, :, :, 2] - min_t
 
-            # print(seq_pos_ids[0, :, 0, 2])
-
             # Get masks for current state.
             mask = bc_mask[:, pred_step - 1: pred_step]  # shape = [bs, N_patch, 3, ...]
 

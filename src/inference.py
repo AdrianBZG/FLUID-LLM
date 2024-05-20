@@ -36,7 +36,7 @@ def get_eval_dl(model, bs, seq_len):
 
 def plot_set(plot_step, true_states, pred_states, title):
     fig, axs = plt.subplots(2, 2, figsize=(10, 9))
-    fig.suptitle(f'{title}, step {plot_step}')
+    fig.suptitle(f'{title}')
     for i, ax in enumerate(axs):
         img_1 = true_states[plot_step, i].cpu()
         img_2 = pred_states[plot_step, i].cpu()
@@ -52,8 +52,10 @@ def plot_set(plot_step, true_states, pred_states, title):
 def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     model.eval()
 
-    ctx_states = 10
+    start_step = 5
+    ctx_states = 3
     pred_steps = 10
+    start_cut = start_step - ctx_states
     end_state = pred_steps + ctx_states if ctx_states == 1 else pred_steps + ctx_states - 1
 
     # Keep the first batch for plotting
@@ -61,8 +63,10 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     N_rmses = []
     # Get batch and run through model
     for i, batch in enumerate(dl):
-        print(f"Batch {i}")
+        # Filter out start
+        batch = [b[:, start_cut:] for b in batch]
         batch = [t.cuda() for t in batch]
+
         states, _, diffs, bc_mask, position_ids = batch
 
         # bs, seq_len, N_patch, channel, px, py = states.shape
@@ -91,10 +95,10 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     N_rmse = torch.mean(N_rmses, dim=0)
     first_rmses = torch.mean(N_rmse[:15])
     c_print(f"First 15 N_RMSE: {first_rmses:.3g}", color='green')
-    c_print(f"Standard N_RMSE: {N_rmse}, Mean: {N_rmse.mean().item():.3g}", color='cyan')
+    c_print(f"Standard N_RMSE: {N_rmse[ctx_states:]}, Mean: {N_rmse.mean().item():.3g}", color='cyan')
 
     # Plotting
-    plot_nums = np.array([0, 2, 4]) + start_state
+    plot_nums = np.array([0, 4]) + ctx_states
     for plot_step in plot_nums:
         true_states, true_diffs, pred_states, pred_diffs = first_batch
 
@@ -102,7 +106,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         # plot_set(plot_step, true_diffs[batch_num], pred_diffs[batch_num], 'Differences')
 
         # Plot states
-        plot_set(plot_step, true_states[batch_num], pred_states[batch_num], 'States')
+        plot_set(plot_step, true_states[batch_num], pred_states[batch_num], f'States, step {plot_step-ctx_states}')
 
 
 def main():
