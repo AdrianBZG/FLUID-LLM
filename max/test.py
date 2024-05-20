@@ -1,5 +1,6 @@
 import torch
 from matplotlib import pyplot as plt
+from scipy.special import erf
 
 def custom_transform(x, C=1.0):
     """
@@ -13,9 +14,10 @@ def custom_transform(x, C=1.0):
     Returns:
     - Tensor: Transformed tensor.
     """
-    sigmoid = torch.sigmoid(x/C) - 0.5
-    transformed_output = sigmoid * C * 4
-    return transformed_output
+    x = erf(x / C) * C
+    # sigmoid = torch.sigmoid(x / C) - 0.5
+    # transformed_output = sigmoid * C * 4
+    return x
 
 
 # Example usage

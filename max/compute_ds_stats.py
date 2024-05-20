@@ -3,10 +3,11 @@ import numpy as np
 
 
 def get_data_loader():
-    ds = SynthDS(patch_size=[16, 16],
-                 stride=[16, 16],
+    ds = SynthDS(patch_size=(16, 16),
+                 stride=(16, 16),
                  seq_len=10,
-                 mode="train"
+                 mode="train",
+                 normalize=True
                  )
     return ds
 
@@ -40,7 +41,7 @@ def main():
     # Average variance
     state_vars, diff_vars = [[] for _ in range(3)], [[] for _ in range(3)]
 
-    for load_no in range(0, 1000, 10):  # range(0, 1000, 1):  #
+    for load_no in range(0, 1000, 1):  # range(0, 1000, 1):  #
 
         state, _, diff, mask, _ = ds.ds_get()
 

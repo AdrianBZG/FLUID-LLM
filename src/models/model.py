@@ -163,7 +163,6 @@ class MultivariateTimeLLM(nn.Module):
         all_states.shape = (bs, (init_len+N_steps), N_patch, 3, 16, 16)
         all_diffs.shape = (bs, N_steps, N_patch, 3, 16, 16)
         """
-        # print(f'{init_states.shape = }, {bc_mask.shape = }, {position_ids.shape = }')
         bs, init_len, N_patch, channel, px, py = init_states.shape
 
         # All states and diffs, including input and predictions for output.
@@ -175,7 +174,6 @@ class MultivariateTimeLLM(nn.Module):
             input_buff.append(init_states[:, t:t+1])
 
         for pred_step in range(init_len, init_len + N_steps):
-            # print(f'{pred_step = }')
             seq_len = len(input_buff)
             # Get correct position ids
             start_pos = (pred_step - seq_len)
@@ -183,6 +181,8 @@ class MultivariateTimeLLM(nn.Module):
             # Normalise timestep so first state is t=0
             min_t = seq_pos_ids[:, :, :, 2].min()
             seq_pos_ids[:, :, :, 2] = seq_pos_ids[:, :, :, 2] - min_t
+
+            # print(seq_pos_ids[0, :, 0, 2])
 
             # Get masks for current state.
             mask = bc_mask[:, pred_step - 1: pred_step]  # shape = [bs, N_patch, 3, ...]

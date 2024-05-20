@@ -115,7 +115,6 @@ def smooth_transition(initial_conditions, boundary_mask, k=25, smooth=True):
     :param k: Steepness of the logistic transition function.
     :param width: Approximate width of the transition zone.
     """
-    # print(initial_conditions.max())
     # Compute distance to the nearest boundary point
     distances = distance_transform_edt(1 - boundary_mask)
 
@@ -130,10 +129,11 @@ def smooth_transition(initial_conditions, boundary_mask, k=25, smooth=True):
     initial_conditions = torch.from_numpy(initial_conditions).float()
     transition = torch.from_numpy(transition).float()
 
-    if smooth:
-        transition = gaussian_blur(transition)
-
     smoothed_conditions = initial_conditions * transition
+
+    if smooth:
+        smoothed_conditions = gaussian_blur(smoothed_conditions)
+
     return smoothed_conditions.squeeze()
 
 

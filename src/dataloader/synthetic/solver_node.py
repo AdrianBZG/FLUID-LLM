@@ -42,6 +42,8 @@ class PDESolver2D:
 
         self.t_eval = torch.linspace(0, self.T, self.Nt)  # Time points to evaluate
 
+        self.ready = False
+
     def set_init_cond(self):
         """
         Sets the initial condition and boundary conditions for the PDE.
@@ -49,6 +51,7 @@ class PDESolver2D:
         Parameters:
         - func: A function of two variables (x and y) that returns the initial state of the system.
         """
+        self.ready = True
         init_cond_gen = InitialConditionGenerator(self.Nx, self.Ny)
 
         bc_gen = BoundaryConditionGenerator(self.Nx, self.Ny)
@@ -97,9 +100,12 @@ class PDESolver2D:
 
         solution.shape = (Nt, 2, Nx, Ny)
         """
+        assert self.ready, "Initial conditions not set."
         with torch.no_grad():
             self.solution = odeint(self.pde_wrapper, self.u0, self.t_eval,
                                    method='rk4', options={'step_size': self.stepsize})  #
+
+        self.ready = False
         return self.solution, self.bc_mask
 
     def plot_solution(self):

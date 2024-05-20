@@ -34,6 +34,7 @@ class SynthDS(Dataset):
         self.pad = pad
         self.seq_len = seq_len
         self.normalize = normalize
+        self.start_step = 10
 
         wave_cfg = WaveConfig(seq_len + 10)
         self.data_gen = PDESolver2D(wave_cfg)
@@ -41,8 +42,6 @@ class SynthDS(Dataset):
         # Load a random file to get min and max values and patch size
         ys, bc_mask = self._load_step()
         state, _ = self._get_step(ys, bc_mask, 5)
-        # Get min and max values for each channel
-        self.ds_min_max = [(state[0].min(), state[0].max()), (state[1].min(), state[1].max()), (state[2].min(), state[2].max())]
 
         # Calculate number of patches, assuming stride = patch_size
         x_px, y_px = state.shape[1:]
@@ -67,7 +66,7 @@ class SynthDS(Dataset):
         sol, bc_mask = self._load_step()
 
         to_patches = []
-        for i in range(10, self.seq_len+10):
+        for i in range(self.start_step, self.seq_len + self.start_step):
             state, mask = self._get_step(sol, bc_mask, step_num=i)
 
             # Patch mask with state
@@ -85,9 +84,7 @@ class SynthDS(Dataset):
         """ Pytorch section of ds_get to avoid multiprocessing bug.
             to_patches.shape = (seq_len, C+1, H, W) where last channel dim is mask.
         """
-
         to_patches = torch.from_numpy(to_patches).float()
-
         patches = self._patch(to_patches)
 
         states = patches[:, :-1]
@@ -112,29 +109,26 @@ class SynthDS(Dataset):
 
     def _normalize(self, states):
         """ states.shape = [seq_len, N_patch, 3, patch_x, patch_y] """
-        # State 0: -0.01235, 0.2208
-        # Diff 0: 0.000707, 0.0394
-        # State var: 0.187
-        # State 1:  0.01128, 0.7572
-        # Diff 1: 0.00428, 0.206
-        # State var: 0.677
-        # State 2: -0.01235, 0.2208
-        # Diff 2: 0.000707, 0.0394
-        # State var: 0.187
+        # State 0: -0.0005653, 0.2364
+        # Diff 0: 0.000548, 0.03722
+        # State 1:  0.01035, 0.7167
+        # Diff 1: 8.94e-05, 0.1617
+        # State 2: -0.0005653, 0.2364
+        # Diff 2: 0.000548, 0.03722
 
-        s0_mean, s0_var = -0.01235, 0.2208
-        s1_mean, s1_var = 0.01128, 0.7572
-        s2_mean, s2_var = -0.01235, 0.2208
+        s0_mean, s0_var = -0.0005653, 0.2364
+        s1_mean, s1_var = 0.01035, 0.7167
+        s2_mean, s2_var = -0.01235, 0.2364
 
         means = torch.tensor([s0_mean, s1_mean, s2_mean]).reshape(1, 1, 3, 1, 1)
-        stds = torch.tensor([0.2208, 0.7572, 0.2208]).reshape(1, 1, 3, 1, 1)
+        stds = torch.tensor([s0_var, s1_var, s2_var]).reshape(1, 1, 3, 1, 1)
 
         # Normalise states
         states = states - means
         states = states / stds
 
         return states
-    
+
     def _get_step(self, ys, bc_mask, step_num):
         """
         Returns all interpolated measurements for a given step, including padding.
@@ -193,7 +187,7 @@ class SynthDS(Dataset):
         if self.mode == "train":
             return 1000
         else:
-            return 125
+            return 128
 
     def _get_pos_id(self):
         # Get positions / times for each patch
@@ -204,6 +198,7 @@ class SynthDS(Dataset):
         t_idx = arange // self.N_patch
         position_ids = np.stack([x_idx, y_idx, t_idx], axis=1).reshape(self.seq_len - 1, self.N_patch, 3)
         return torch.from_numpy(position_ids)
+
 
 def plot_all_patches():
     patch_size, stride = (16, 16), (16, 16)
@@ -221,7 +216,7 @@ def plot_all_patches():
     x_count, y_count = seq_dl.N_x_patch, seq_dl.N_y_patch
     N_patch = seq_dl.N_patch
 
-    show_dim = 1
+    show_dim = 0
     p_shows = state[0, :, :, show_dim]  # shape = (N_patch, seq_len, 16, 16)
     p_shows = p_shows.reshape(-1, N_patch, 16, 16)
     vmin, vmax = p_shows.min(), p_shows.max()
