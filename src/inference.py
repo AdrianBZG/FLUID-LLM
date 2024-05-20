@@ -70,7 +70,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         states, _, diffs, bc_mask, position_ids = batch
 
         # bs, seq_len, N_patch, channel, px, py = states.shape
-        pred_states, pred_diffs = model.gen_seq(batch, pred_steps=pred_steps, start_state=ctx_states)
+        pred_states, pred_diffs = model.gen_seq(batch, pred_steps=pred_steps-1, start_state=ctx_states)
         pred_states = pred_states[:, :-1]
 
         # print(f'{pred_states.shape = }')

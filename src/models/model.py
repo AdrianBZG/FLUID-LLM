@@ -111,7 +111,7 @@ class MultivariateTimeLLM(nn.Module):
             # Freeze backbone parameters
             freeze_model(self.backbone)
 
-    def _forward(self, x, position_ids):
+    def forward(self, x, position_ids):
         """
             x.shape = (bs, seq_len, N_patch, 3, 16, 16)
             returns.shape = (bs, seq_len, Nx_px, Ny_px, 3)
@@ -218,10 +218,11 @@ class MultivariateTimeLLM(nn.Module):
         # else:
         init_state = states[:, :start_state]
 
-        all_states, all_diffs = self._generate(init_state, bc_mask, position_ids, pred_steps)
-
+        # print(f'{init_state.shape = }')
+        all_states, all_diffs = self._generate(init_state, bc_mask, position_ids, pred_steps+1)
+        # print(f'{all_states.shape = }')
         # if start_state == 1:
-        # all_states = all_states[:, 1:]
+        #     all_states = all_states[:, 1:]
 
         all_states = patch_to_img(all_states, self.ds_props)
         all_diffs = patch_to_img(all_diffs, self.ds_props)
@@ -232,7 +233,7 @@ class MultivariateTimeLLM(nn.Module):
 
         states = torch.cat([states[:, :1], states], dim=1)
         position_ids = torch.cat([position_ids[:, :1], position_ids], dim=1)
-        pred_diffs = self._forward(states, position_ids)
+        pred_diffs = self.forward(states, position_ids)
         pred_diffs = pred_diffs[:, 1:]
 
         return pred_diffs
