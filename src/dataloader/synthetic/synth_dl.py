@@ -34,7 +34,7 @@ class SynthDS(Dataset):
         self.pad = pad
         self.seq_len = seq_len
         self.normalize = normalize
-        self.start_step = 10
+        self.start_step = 0
 
         wave_cfg = WaveConfig(seq_len + 10)
         self.data_gen = PDESolver2D(wave_cfg)

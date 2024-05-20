@@ -22,7 +22,8 @@ class PDEs:
         self.set_params()
 
     def set_params(self):
-        self.C = np.random.rand() * 20
+
+        self.C =  np.random.rand() * 10 * 0 + 0
 
     def wave_equation(self, u, dudt):
         """

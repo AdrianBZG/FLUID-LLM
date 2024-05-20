@@ -7,11 +7,12 @@ import torch
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from cprint import c_print
+import numpy as np
+import torch.nn.functional as F
 
 from utils import set_seed, load_yaml_from_file, get_available_device, get_save_folder, get_accelerator
 from utils_model import calc_n_rmse, patch_to_img, get_data_loader
 from models.model import MultivariateTimeLLM
-import torch.nn.functional as F
 
 from dataloader.synthetic.synth_dl import SynthDS
 
@@ -34,7 +35,7 @@ def get_eval_dl(model, bs, seq_len):
 
 
 def plot_set(plot_step, true_states, pred_states, title):
-    fig, axs = plt.subplots(3, 2, figsize=(15, 9))
+    fig, axs = plt.subplots(2, 2, figsize=(10, 9))
     fig.suptitle(f'{title}, step {plot_step}')
     for i, ax in enumerate(axs):
         img_1 = true_states[plot_step, i].cpu()
@@ -68,6 +69,9 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         pred_states, pred_diffs = model.gen_seq(batch, pred_steps=pred_steps, start_state=start_state)
         pred_states = pred_states[:, :-1]
 
+        print(f'{pred_states.shape = }')
+        print(pred_states.std(dim=(0, 2, 3, 4)) )
+
         true_states = patch_to_img(states, model.ds_props)
         true_diffs = patch_to_img(diffs, model.ds_props)
         bc_mask = patch_to_img(bc_mask.float(), model.ds_props).bool()
@@ -81,6 +85,8 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         if first_batch is None:
             first_batch = (true_states, true_diffs, pred_states, pred_diffs)
 
+        break
+
     N_rmses = torch.cat(N_rmses, dim=0)
     N_rmse = torch.mean(N_rmses, dim=0)
     first_rmses = torch.mean(N_rmse[:15])
@@ -88,7 +94,8 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     c_print(f"Standard N_RMSE: {N_rmse}, Mean: {N_rmse.mean().item():.3g}", color='cyan')
 
     # Plotting
-    for plot_step in range(0, 10, 2):
+    plot_nums = np.array([0, 2, 4]) + start_state
+    for plot_step in plot_nums:
         true_states, true_diffs, pred_states, pred_diffs = first_batch
 
         # # Plot diffs
@@ -105,7 +112,7 @@ def main():
     bs = 16
 
     plot_step = -1
-    plot_batch_num = 2
+    plot_batch_num = 0
 
     set_seed()
 
