@@ -52,9 +52,9 @@ def plot_set(plot_step, true_states, pred_states, title):
 def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     model.eval()
 
-    start_state = 10
+    ctx_states = 10
     pred_steps = 10
-    end_state = pred_steps + start_state if start_state == 1 else pred_steps + start_state - 1
+    end_state = pred_steps + ctx_states if ctx_states == 1 else pred_steps + ctx_states - 1
 
     # Keep the first batch for plotting
     first_batch = None
@@ -66,7 +66,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         states, _, diffs, bc_mask, position_ids = batch
 
         # bs, seq_len, N_patch, channel, px, py = states.shape
-        pred_states, pred_diffs = model.gen_seq(batch, pred_steps=pred_steps, start_state=start_state)
+        pred_states, pred_diffs = model.gen_seq(batch, pred_steps=pred_steps, start_state=ctx_states)
         pred_states = pred_states[:, :-1]
 
         print(f'{pred_states.shape = }')
