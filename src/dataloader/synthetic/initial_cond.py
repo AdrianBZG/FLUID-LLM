@@ -14,11 +14,13 @@ class InitialConditionGenerator:
         self.min_scale = min_length / 10
         self.max_scale = min_length / 2
 
-    def random_cond(self):
+    def random_cond(self, rnd=None):
         """
         Randomly selects a type of initial condition to return
         """
-        rnd = np.random.randint(3)
+        if rnd is None:
+            rnd = np.random.randint(3)
+
         if rnd == 0:
             init_cond = self.multiple_gaussian_pulses()
             return init_cond
@@ -156,10 +158,30 @@ def gaussian_blur(image: torch.Tensor):
 
 
 def main():
-    icg = InitialConditionGenerator(100, 100)
-    conds = icg.random_cond()
-    plt.imshow(conds)
+    generator = InitialConditionGenerator(100, 100)
+
+    # Generate boundary condition masks
+    square_mask = generator.random_cond(rnd=0)
+    elliptical_mask = generator.random_cond(rnd=1)
+    irregular_mask = generator.random_cond(rnd=2)
+
+    # Visualization
+    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+    ax[0].imshow(square_mask, origin='lower')
+    ax[0].set_title("Gaussian Pulses")
+    ax[1].imshow(elliptical_mask, origin='lower')
+    ax[1].set_title("Plane waves")
+    ax[2].imshow(irregular_mask, origin='lower')
+    ax[2].set_title("Gaussian Pulses + Plane waves")
+
+    [a.axis("off") for a in ax]
+    # plt.tight_layout()
+    plt.savefig("boundary_conditions.pdf")
     plt.show()
+    # icg = InitialConditionGenerator(100, 100)
+    # conds = icg.random_cond(rng=1)
+    # plt.imshow(conds)
+    # plt.show()
 
 
 if __name__ == "__main__":

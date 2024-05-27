@@ -126,4 +126,8 @@ if __name__ == "__main__":
     ax[1].set_title("Elliptical Boundary")
     ax[2].imshow(irregular_mask, origin='lower')
     ax[2].set_title("Random Irregular Boundary")
+
+    [a.axis("off") for a in ax]
+    # plt.tight_layout()
+    plt.savefig("boundary_conditions.pdf")
     plt.show()
