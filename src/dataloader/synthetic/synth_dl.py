@@ -216,22 +216,44 @@ def plot_all_patches():
     x_count, y_count = seq_dl.N_x_patch, seq_dl.N_y_patch
     N_patch = seq_dl.N_patch
 
-    show_dim = 0
-    p_shows = state[0, :, :, show_dim]  # shape = (N_patch, seq_len, 16, 16)
-    p_shows = p_shows.reshape(-1, N_patch, 16, 16)
-    vmin, vmax = p_shows.min(), p_shows.max()
-    print(f'{vmin = :.2g}, {vmax = :.2g}')
-    for show_step in range(0, 9):
-        fig, axes = plt.subplots(y_count, x_count, figsize=(16, 16))
-        for i in range(y_count):
-            for j in range(x_count):
-                p_show = p_shows[show_step, i + j * y_count].numpy()
-                p_show = p_show.T
-                axes[i, j].imshow(p_show[:, :], vmin=vmin, vmax=vmax)
-                axes[i, j].axis('off')
+    fig, axes = plt.subplots(2, 8, figsize=(18, 5))
+    for show_step in range(8):
+        for show_dim in [0, 1]:
+            p_shows = state[0, :, :, show_dim]  # shape = (N_patch, seq_len, 16, 16)
+            p_shows = p_shows.reshape(-1, N_patch, 16, 16)
+            vmin, vmax = p_shows.min(), p_shows.max()
+            print(f'{vmin = :.2g}, {vmax = :.2g}')
 
-        fig.tight_layout()
+            # Initialize an empty array for the full image
+            full_image = np.zeros((y_count * 16, x_count * 16))
+            # Fill in the full image with the patches
+            for i in range(y_count):
+                for j in range(x_count):
+                    p_show = p_shows[show_step, i + j * y_count].numpy()
+                    p_show = p_show.T  # Transpose if needed
+                    full_image[i * 16:(i + 1) * 16, j * 16:(j + 1) * 16] = p_show
+
+            print(show_step)
+            ax = axes[show_dim, show_step]
+            # Plot the full image
+            ax.set_title("t = " + str(show_step))
+            ax.imshow(full_image, vmin=vmin, vmax=vmax)
+            ax.axis('off')
+
+
+    plt.tight_layout()
     plt.show()
+
+    # fig, axes = plt.subplots(y_count, x_count, figsize=(16, 16))
+    # for i in range(y_count):
+    #     for j in range(x_count):
+    #         p_show = p_shows[show_step, i + j * y_count].numpy()
+    #         p_show = p_show.T
+    #         axes[i, j].imshow(p_show[:, :], vmin=vmin, vmax=vmax)
+    #         axes[i, j].axis('off')
+    #
+    # fig.tight_layout()
+    # plt.show()
 
     # p_shows = diffs[0]
     # fig, axes = plt.subplots(y_count, x_count, figsize=(16, 4))
@@ -252,5 +274,5 @@ if __name__ == '__main__':
     from matplotlib import pyplot as plt
     from utils import set_seed
 
-    set_seed(1)
+    # set_seed(1)
     plot_all_patches()
