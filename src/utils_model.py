@@ -13,15 +13,13 @@ def get_data_loader(config, mode="train"):
         stride=config['stride'],
         seq_len=config['seq_len'],
         mode=mode,
-        normalize=config['normalize'],
     )
 
     dl = DataLoader(ds,
                     batch_size=config['batch_size'],
                     num_workers=config['num_workers'],
                     prefetch_factor=2,
-                    pin_memory=True,
-                    shuffle=(mode == 'train'))
+                    pin_memory=True,)
 
     N_x_patch, N_y_patch = ds.N_x_patch, ds.N_y_patch
     seq_len = ds.seq_len - 1

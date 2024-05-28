@@ -22,12 +22,10 @@ logging.basicConfig(level=logging.INFO,
 
 def get_eval_dl(model, bs, seq_len):
     ds = SynthDS(
-
         patch_size=model.config['patch_size'],
         stride=model.config['stride'],
         seq_len=seq_len,
         mode='valid',
-        # normalize=model.config['normalize_ds']
     )
 
     dl = DataLoader(ds, batch_size=bs, num_workers=8, pin_memory=True)
@@ -35,14 +33,18 @@ def get_eval_dl(model, bs, seq_len):
 
 
 def plot_set(plot_step, true_states, pred_states, title):
+    true_states, pred_states = true_states[plot_step].cpu(), pred_states[plot_step].cpu()
+
     fig, axs = plt.subplots(2, 2, figsize=(10, 9))
     fig.suptitle(f'{title}')
     for i, ax in enumerate(axs):
-        img_1 = true_states[plot_step, i].cpu()
-        img_2 = pred_states[plot_step, i].cpu()
+        img_1 = true_states[i]
+        img_2 = pred_states[i]
 
-        ax[0].imshow(img_1.T)  # Initial image
-        ax[1].imshow(img_2.T)  # Predictions
+        vmin, vmax = img_1.min(), img_1.max()
+
+        ax[0].imshow(img_1.T, vmin=vmin, vmax=vmax)  # Initial image
+        ax[1].imshow(img_2.T, vmin=vmin, vmax=vmax)  # Predictions
         ax[0].axis('off'), ax[1].axis('off')
     fig.tight_layout()
     fig.show()
@@ -53,7 +55,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     model.eval()
 
     start_step = 5
-    ctx_states = 3
+    ctx_states = 5
     pred_steps = 10
     start_cut = start_step - ctx_states
     end_state = pred_steps + ctx_states if ctx_states == 1 else pred_steps + ctx_states - 1
@@ -89,7 +91,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
         if first_batch is None:
             first_batch = (true_states, true_diffs, pred_states, pred_diffs)
 
-        # break
+        break
 
     N_rmses = torch.cat(N_rmses, dim=0)
     N_rmse = torch.mean(N_rmses, dim=0)
@@ -98,7 +100,7 @@ def test_generate(model: MultivariateTimeLLM, dl, plot_step, batch_num=0):
     c_print(f"Standard N_RMSE: {N_rmse[ctx_states:]}, Mean: {N_rmse.mean().item():.3g}", color='cyan')
 
     # Plotting
-    plot_nums = np.array([0, 4]) + ctx_states
+    plot_nums = np.array([0, pred_steps-2]) + ctx_states
     for plot_step in plot_nums:
         true_states, true_diffs, pred_states, pred_diffs = first_batch
 
@@ -113,7 +115,7 @@ def main():
     load_no = -1
     save_epoch = 180
     seq_len = 23
-    bs = 16
+    bs = 8
 
     plot_step = -1
     plot_batch_num = 0
