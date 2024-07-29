@@ -9,8 +9,9 @@ import time
 import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
+import natsort
 
-from dataloader.mesh_utils import to_grid, get_mesh_interpolation
+from dataloader.mesh_utils import to_grid, get_mesh_interpolation, plot_full_patches
 
 
 def num_patches(dim_size, kern_size, stride, padding=0):
@@ -41,7 +42,7 @@ class MGNDataset(Dataset):
         self.normalize = normalize
         self.noise = noise
 
-        self.save_files = sorted([f for f in os.listdir(f"{self.load_dir}/") if f.endswith('.pkl')])
+        self.save_files = natsort.natsorted([f for f in os.listdir(f"{self.load_dir}/") if f.endswith('.pkl')])
         # Load a random file to get min and max values and patch size
         triang, tri_index, grid_x, grid_y, save_data = self._load_step(self.save_files[1])
         state, _ = self._get_step(triang, tri_index, grid_x, grid_y, save_data, step_num=20)
@@ -232,10 +233,10 @@ class MGNDataset(Dataset):
 def plot_all_patches():
     patch_size = (16, 16)
 
-    seq_dl = MGNDataset(load_dir="./ds/MGN/cylinder_dataset/train", resolution=238, patch_size=patch_size, stride=patch_size,
-                        seq_len=10, seq_interval=2, normalize=False)
+    seq_dl = MGNDataset(load_dir="./ds/MGN/cylinder_dataset/test", resolution=238, patch_size=patch_size, stride=patch_size,
+                        seq_len=253, seq_interval=1, normalize=False, mode='test')
 
-    ds = DataLoader(seq_dl, batch_size=8, shuffle=True)
+    ds = DataLoader(seq_dl, batch_size=8, shuffle=False)
 
     for batch in ds:
         state, next_state, diffs, mask, pos_id = batch
@@ -245,14 +246,17 @@ def plot_all_patches():
     N_x, N_y = seq_dl.N_x_patch, seq_dl.N_y_patch
     print(f'{N_x = }, {N_y = }')
 
-    p_shows = state[0, 0, :, 0]
-    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
-
-    p_shows = diffs[0, 0, :, 0]
-    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
-
-    p_shows = next_state[0, 0, :, 0]
-    plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
+    fig, axs = plt.subplots(4, figsize=(15, 12))
+    for ax, T in zip(axs, [0, 40, 80, 120]):
+        p_shows = state[0, T, :, 0]
+        plot_full_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch), ax)
+    plt.tight_layout()
+    plt.show()
+    # p_shows = diffs[0, 0, :, 0]
+    # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
+    #
+    # p_shows = next_state[0, 0, :, 0]
+    # plot_patches(p_shows, (seq_dl.N_x_patch, seq_dl.N_y_patch))
 
 
 if __name__ == '__main__':
