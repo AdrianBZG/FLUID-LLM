@@ -6,10 +6,11 @@ import pickle
 import random
 from cprint import c_print
 import time
-from dataloader.synthetic.solver_node import WaveConfig, PDESolver2D
 import torch
 from torch.utils.data import Dataset, DataLoader
-from dataloader.mesh_utils import to_grid, get_mesh_interpolation
+
+from src.dataloader.mesh_utils import to_grid, get_mesh_interpolation
+from src.dataloader.synthetic.solver_node import WaveConfig, PDESolver2D
 
 
 def num_patches(dim_size, kern_size, stride, padding=0):
@@ -272,7 +273,7 @@ def plot_all_patches():
 
 if __name__ == '__main__':
     from matplotlib import pyplot as plt
-    from utils import set_seed
+    #from utils import set_seed
 
     # set_seed(1)
     plot_all_patches()

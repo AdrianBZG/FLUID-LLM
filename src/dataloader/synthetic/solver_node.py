@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from torchdiffeq import odeint
 import torch
 
-from dataloader.synthetic.initial_cond import InitialConditionGenerator, smooth_transition
-from dataloader.synthetic.boundary_domain import BoundaryConditionGenerator
-from dataloader.synthetic.pdes import PDEs
+from src.dataloader.synthetic.initial_cond import InitialConditionGenerator, smooth_transition
+from src.dataloader.synthetic.boundary_domain import BoundaryConditionGenerator
+from src.dataloader.synthetic.pdes import PDEs
 
 
 class WaveConfig:
@@ -140,7 +140,7 @@ class PDESolver2D:
 if __name__ == "__main__":
     import time
 
-    cfg = WaveConfig()
+    cfg = WaveConfig(1)
     solver = PDESolver2D(cfg)
     solver.set_init_cond()
     print("Initial cond set")
